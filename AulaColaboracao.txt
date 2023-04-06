@@ -1,5 +1,12 @@
 Aula 06-04-23
 
+Iniciar:
+cd 'pasta que quero entrar'
+sempre add arquivo
+comitar arquivo
+salvar
+pra enviar pro github - git push origin master
+
 Recuperar arquivo do github:
 Vai no 'code' na pasta do github, copia o endereço ssd.
 Abre o git bash na pasta que eu quero baixar, e dá um git clone e o endereço ssd.
