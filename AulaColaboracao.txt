@@ -1,3 +1,6 @@
 Aula 06-04-23
 
+Recuperar arquivo do github:
+Vai no 'code' na pasta do github, copia o endereço ssd.
+Abre o git bash na pasta que eu quero baixar, e dá um git clone e o endereço ssd.
 Colaboração
