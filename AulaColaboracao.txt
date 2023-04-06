@@ -14,3 +14,18 @@ Abre o git bash na pasta que eu quero baixar, e dá um git clone e o endereço s
 Colaboração GitHub
 
 Vai no GitHub, no repositório que quer colaborar de outra pessoa, e clica em Fork.
+
+Quais ramos tem no repositorio:
+git branch
+Ele mostra quantos ramos tem e quais tem, .. se quiser criar um ramo novo, preciso dar git branch novo_ramo
+Se digitar git branch novamente, o novo_ramo já vai aparecer também
+Pra ir pro ramo novo git checkout novo_ramo
+Pra voltar pro mestre, git checkout master
+
+Se quiser criar um novo ramo e já ir pra ele, só dar git checkout -m ramo_novo
+O -b faz o git entender que eu to indo pra um ramo e se ele nao existe, ele cria um.
+
+Colaboração:
+Depois que deu fork, vai em pull requests e add um novo.
+
+
