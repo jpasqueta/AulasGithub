@@ -28,4 +28,10 @@ O -b faz o git entender que eu to indo pra um ramo e se ele nao existe, ele cria
 Colaboração:
 Depois que deu fork, vai em pull requests e add um novo.
 
+Salvar as atualizações do github de outra pessoa no seu computador:
+git remote add origin_unesp e cola o ssd.
+
+
+
+
 

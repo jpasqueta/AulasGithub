@@ -139,6 +139,260 @@ dados %>%
    mutate(across(where(is.numeric),scale)) 
 dados
 
+#Criar uma coluna com a transformação z-score para altura por type utilizando
 
+dados %>% 
+  group_by(type) %>% 
+  mutate(
+    z_height = (height-mean(height))/sd(height),
+    z_height = (weight-mean(weight))/sd(weight))
+  )
 
+  library(ggplot2)
+
+dados %>% pull(type) %>% unique
+
+ggplot(df)+
+  geom_density(aes(x = z_height, color = type))+
+  theme_bw()
+
+f <- function(x){
+  if(x <= 15){ #? no caso, o valor é 300
+    return("Executei essa ação")
+  }else{
+      return("Executei aquela ação")
+  }
+}
+
+x1 <- c(30, 16, 20, 3)
+f(x1)
+
+#* O código abaixo funciona
+#todo
+
+dados %>% 
+rowwise() %>% 
+mutate(
+  nova_var = f(height)
+) %>% 
+  select(height, nova_var) %>% head(30)
+
+#? ifelse e case_when
+
+dados %>% 
+mutate(
+  tamanho = ifelse(
+    height < 15,
+    "baixinho",
+    "altão"
+  )
+) %>% head
+
+dados %>% 
+mutate(
+  tamanho = case_when(
+    height < 5 ~ "baixinho",
+    height < 10 ~ "pequeno",
+    height < 15 ~ "médio",
+    TRUE ~ "altão"
+  )
+) %>% head
+
+ff <- function(y){
+  resposta <- c()
   
+  for(i in 1:length(y)){
+    if(y[i] <= 15){ #? no caso, o valor é 300
+      resposta[i] <- "baixinho"
+  }else{
+    
+    resposta[i] <- "altão"
+  }
+}
+
+return(resposta)
+}
+
+dados %>% 
+  mutate(
+    tamanho = case_when(
+      height < 5 ~ "baixinho",
+      height < 10 ~ "pequeno",
+      height < 15 ~ "médio",
+      TRUE ~ NA
+    )
+  ) %>% head
+
+# Juntar dados
+#bind
+#rbind = junta a linha
+#cbind = junta a coluna
+
+df_A = data.frame(A = c(1, 2, 3, 4),B = c(5,6,7,8))
+df_B = data.frame(A = c(12, 22, 32, 42),C = c(7,5,9,8))
+rbind(df_A, df_B)
+
+df_A = data.frame(A = c(1, 2, 3, 4))
+df_B = data.frame(B = c(12, 22, 32, 42))
+cbind(df_A, df_B)
+
+#outras funções
+
+# bind_rows tudo que nao existir de colunas ele poe NA
+bind_rows(df_A, df_B)
+
+
+#? Vamos falar de JOIN
+
+df_means <- dados %>% 
+  group_by(type) %>% 
+  summarise(
+    media_h = mean(height),
+    media_w = mean(weight)
+  )
+df_means
+
+#? vamos excluir os grupos que começam com "g"
+#Todo
+
+df_means <- df_means %>% 
+  filter(!grepl("^g",type))
+
+df_means
+# o ! do começo significa 'não tem' e o ^antes do g significa que é a inicial
+
+#? vamos adicionar um grupo que nao existe
+
+novo_grupo <- data.frame(
+  type = "Vozes da minha cabeça",
+  media_h = 1000,
+  media_w = 400.82
+)
+
+#TODO adicionar o grupo
+df_means <- rbind(df_means, novo_grupo)
+
+### Boa prática
+
+dados <- dados %>% 
+  mutate_if(is.character,function(x) trimws(x,"both"))
+#? full_join
+#TODO
+
+# full -> vai manter tudo de todos
+
+df <- full_join(dados,df_means,by = "type")
+View(df)
+
+#? inner_join
+#TODO
+
+# inner -> só deixa o que tiver correspondencia em todos
+df <- inner_join(dados,df_means,by = "type")
+View(df)
+
+#? left_join
+#TODO
+
+# left -> mantem o que tiver no df da esquerda que nao tiver correspondencia e exclui os da direita que nao tem
+df <- left_join(dados,df_means,by = "type")
+View(df)
+
+#? right_join
+#TODO
+
+df <- right_join(dados,df_means,by = "type")
+View(df)
+
+# Sintaxe
+
+names(dados)
+
+df_means <- dados %>% 
+  group_by(type, secundary.type) %>% 
+  summarise(
+    media_h = mean(height),
+    media_w = mean(weight)
+  )
+df_means
+
+df <- right_join(dados,df_means,by = c("type" = "type","secundary.type" = "secundary.type"))
+View(df)
+
+#? vamos adicionar um grupo que JÁ existe
+
+novo_grupo <- data.frame(
+  type = "bug",
+  media_h = 10,
+  media_w = 800
+)
+df_means <- rbind(df_means, novo_grupo)
+View(df_means)
+
+#?#############################################
+
+library(tidyr)
+
+#? baixado de https://livro.curso-r.com/
+
+dados <- readr::read_rds(file = "imdb.rds")
+
+head(dados)
+names(dados)
+
+df <- dados %>% 
+  select(titulo, orcamento, receita, receita_eua)
+df
+
+# um grafico com 10 primeiros filmes
+# gráfico de barras
+# cada barra vem de uma coluna e aparece com uma cor diferente
+# eixo x o filme
+
+#TODO checar se cada filme tem apenas um genero associado.
+
+#? Pivoteamento
+
+#? pivot_wider
+
+#? pivot_longer
+
+df_long <- df %>% 
+  slice(1:10) %>% 
+tidyr::pivot_longer(2:4, values_to = "Valor", names_to = "Tipo de Valor")
+View(df %>% slice(1:10))
+View(df_long)
+
+df_long
+
+library(ggplot2)
+
+ggplot()+
+  geom_col(data = df_long, aes(x = titulo, y = Valor, fill = `Tipo de Valor`),
+      position = position_dodge2()
+      )+
+  theme_bw()+
+  theme(
+axis.text.x = element_text(angle = 45, hjust = 1.0)
+)
+
+## Pivot wider
+
+df_long %>% 
+  tidyr::pivot_wider(names_from = `Tipo de Valor`, values_from = "Valor")
+
+# correlaçao cor() - recebe uma matriz
+
+## Tarefa para o dia 25-05
+
+setwd("C:/Users/jessi/Área de Trabalho/AulasGitHub")
+dados <- readr::read_rds(file = "imdb.rds")
+
+Orçamento <- dados$orcamento
+Receita <- dados$receita
+Receita_USA <- dados$receita_eua
+cbind(Orçamento, Receita, Receita_USA)
+
+correlacao <- cor(Orçamento, Receita, Receita_USA, use = "pairwise.complete.obs")
+
+print(correlacao)
