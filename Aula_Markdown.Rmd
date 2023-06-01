@@ -1,0 +1,201 @@
+---
+title: "Aula Markdown"
+author: "Jéssica Pasqueta"
+date: "2023-05-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Digitar qualquer coisa
+
+**Negrito**, *itálico*, ~~taxado~~
+
+$\alpha$, $\beta$
+
+\[\frac{dV}{dt} = \alpha t\]
+
+> [fontsawesome](https://fontawesome.com/icons) `r fontawesome::fa("triangle-exclamation", fill = "orange")`
+
+Para montar blocos, o comando é ctrl alt i
+
+```{r}
+library(ggplot2)
+#library(tidlyr)
+library(dplyr)
+```
+
+## Lendo o conjunto de dados
+
+```{r}
+dados <- read.csv("Pokemon_full.csv")
+head(dados)
+```
+
+## Básico
+
+O ggplot2 funciona com construção de "camadas" (layers).  O comanto `{r} ggplot()`inicia um gráfico vazio.
+
+```{r}
+ggplot()
+```
+
+### Adicionando layers
+
+Usar `{r} geom_yyy,data = dados, aes(x = x, y = y), sendo line para linhas, point para pontos. Lembrando que o aes é o tipo, entao a cor que eu quero tem que ficar fora dos parenteses do aes.
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight))
+```
+Se quisermos que os pontos tenham uma cor em particular, usamos
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight), color = "purple")
+```
+Se eu quiser que a cor dependa do tipo de pokemon
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight, color = type))
+```
+
+Note que o ggplot2 funciona em um esquema de linha por linha, ou seja, os dados devem estar em formato "long table"
+
+## Cores, formas e eixos
+
+É possível alterar as cores dos gráficos, por exemplo, usando escalas pré programadas
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight, color = type))+scale_color_brewer(palette = "PuRd")
+```
+
+Ou até mesmo passando as cores que queremos usar. Vamos criar a columa tamanho, como antes, mudando um pouco os breaks
+
+```{r}
+dados <- dados %>% 
+  dplyr::mutate(
+    tamanho = dplyr::case_when(
+      height < 5 ~"Baixinho",
+      height < 50 ~ "Pequeno",
+      height < 100 ~ "Médio",
+      TRUE ~ "Altão"
+    )
+  )
+```
+
+# Criar o plot com cores em função do tamanho
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight, color = tamanho))+ scale_color_manual(values = c("blue","red","gray","purple"))
+```
+
+```{r}
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight, color = tamanho, fill = tamanho, shape = tamanho))+
+  scale_color_manual(values = c("blue", "red", "grey", "purple"), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_fill_manual(values = c("blue", "red", "grey", "purple"), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_shape_manual(values = c(21,22,23,24), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_y_continuous(limits = c(0,12000), expand = c(0,0), name = "Peso")+
+  scale_x_continuous(limits = c(0,250), expand = c(0,2), name = "Altura")+
+  theme_bw()
+```
+
+```{r}
+library(rcartocolor)
+cores <- carto_pal(3, name = "Bold")
+ggplot()+
+  geom_density(data = dados, aes(x = height, color = "Altura", fill = "Altura", linetype = "Altura"), alpha = 0.6)+
+  geom_density(data = dados, aes(x = weight, color = "Peso", fill = "Peso", linetype = "Peso"), alpha = 0.6)+
+scale_x_continuous(trans = "log10")+
+  scale_color_manual(values = cores[1:2])+
+  scale_fill_manual(values = cores[1:2])+
+  labs(x = "Medida", y = "Densidade", color = "Tipo de medida", linetype = "Tipo de medida", fill = "Tipo de medida")+
+  theme_bw()
+  
+
+dados %>% head()
+
+```
+```{r}
+dados %>% 
+  select(Peso = weight, Altura = height) %>% 
+  tidyr::pivot_longer(cols = c(1,2), values_to = "Medida", names_to = "Tipo de medida") %>%
+  ggplot()+
+  geom_density(aes(x = `Medida`, color = `Tipo de medida`, fill = `Tipo de medida`, linetype = `Tipo de medida`), alpha = 0.6)+
+ scale_x_continuous(trans = "log10")+
+  scale_color_manual(values = cores[1:2])+
+  scale_fill_manual(values = cores[1:2])+
+  labs(x = "Medida", y = "Densidade", color = "Tipo de medida", linetype = "Tipo de medida", fill = "Tipo de medida")+
+  theme_bw()
+```
+
+## Adicionando outros temas
+
+```{r}
+library(ggthemes)
+
+ggplot()+
+  geom_point(data = dados, aes(x = height, y = weight, color = tamanho, fill = tamanho, shape = tamanho))+
+  scale_color_manual(values = c("blue", "red", "grey", "purple"), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_fill_manual(values = c("blue", "red", "grey", "purple"), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_shape_manual(values = c(21,22,23,24), breaks = c("Baixinho", "Pequeno", "Médio", "Altão"), name = "Classe de tamanho")+
+  scale_y_continuous(limits = c(0,12000), expand = c(0,0), name = "Peso")+
+  scale_x_continuous(limits = c(0,250), expand = c(0,2), name = "Altura")+
+  labs(title = "Título do Gráfico")
+  theme_clean()+
+  theme(
+    axis.text = element_text(size = 16),
+    axis.title = element_text(size = 18, face = "bold"),
+    plot.title = element_text(size = 25, face = "bold"),
+    legend.position = "bottom",
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 16)
+  )
+
+```
+
+## Gráfico de barras
+
+```{r}
+df <- dados %>% 
+   group_by(type) %>% 
+  summarise(
+    media_h = mean(height),
+    media_w = mean(weight)
+  ) 
+fator <- max(df$media_w)/max(df$media_h)
+fator
+ df$media_h <- df$media_h*fator
+  df %>% 
+   tidyr::pivot_longer(cols = c("media_h", "media_w"), names_to = "tipo", values_to = "media") %>% 
+  ggplot()+
+  geom_col(aes(x = type, y = media, color = tipo, fill = tipo), position = position_dodge2())+
+    scale_y_continuous(
+    name = "Média do peso",
+    sec.axis = sec_axis(~./fator, name = "Média da altura"),
+    expand = c(0,0)
+  )+
+    scale_x_discrete(name = "Tipo de Pokemon")+
+  scale_color_brewer(palette = "RdPu")+
+  scale_fill_brewer(palette = "RdPu")+
+  theme_bw()+
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.position = "bottom",
+   axis.text.x = element_text(angle = 75, vjust = 0.5),
+
+   
+  )
+```
+
+
+
+
+
